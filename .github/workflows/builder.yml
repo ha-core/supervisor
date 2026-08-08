@@ -117,6 +117,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Chinese source replacements
+      - name: Set source
+        run: |
+          sed -i ${{ vars.VERSION_SOURCE }} supervisor/const.py
+          sed -i ${{ vars.ADDONS_SOURCE }} supervisor/store/const.py
+
       - name: Write env-file for wheels build
         if: needs.init.outputs.build_wheels == 'true'
         run: |
