@@ -268,6 +268,16 @@ jobs:
           name: wheels-amd64
           path: wheels
 
+      # Chinese source replacements
+      - name: Set source
+        run: |
+          sed -i ${{ vars.VERSION_SOURCE }} supervisor/const.py
+          cat supervisor/const.py
+          sed -i ${{ vars.ADDONS_SOURCE }} supervisor/store/const.py
+          cat supervisor/store/const.py
+          sed -i ${{ vars.REPLACE_REPOSITORY_NAME }} pyproject.toml
+          sed -i ${{ vars.MODIFY_TIMEZONE }} Dockerfile
+
       # Build the Supervisor for non-publish runs (e.g. PRs)
       - name: Build the Supervisor
         if: needs.init.outputs.publish != 'true'
