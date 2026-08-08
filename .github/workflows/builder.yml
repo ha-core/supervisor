@@ -122,6 +122,8 @@ jobs:
         run: |
           sed -i ${{ vars.VERSION_SOURCE }} supervisor/const.py
           sed -i ${{ vars.ADDONS_SOURCE }} supervisor/store/const.py
+          sed -i ${{ vars.REPLACE_REPOSITORY_NAME }} pyproject.toml
+          sed -i ${{ vars.MODIFY_TIMEZONE }} Dockerfile
 
       - name: Write env-file for wheels build
         if: needs.init.outputs.build_wheels == 'true'
