@@ -231,7 +231,7 @@ jobs:
 
   version:
     name: Update version
-    if: github.repository_owner == 'home-assistant' && needs.init.outputs.publish == 'true'
+    if: github.repository_owner == 'ha-core' && needs.init.outputs.publish == 'true'
     needs: ["init", "run_supervisor"]
     runs-on: ubuntu-latest
     steps:
