@@ -65,7 +65,7 @@ jobs:
 
       - name: Get version
         id: version
-        uses: home-assistant/actions/helpers/version@master
+        uses: ha-core/actions/helpers/version@master
         with:
           type: ${{ env.BUILD_TYPE }}
 
