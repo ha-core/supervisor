@@ -123,6 +123,7 @@ jobs:
           sed -i ${{ vars.VERSION_SOURCE }} supervisor/const.py
           sed -i ${{ vars.ADDONS_SOURCE }} supervisor/store/const.py
           sed -i ${{ vars.OS_DOWNLOAD_SOURCE }} supervisor/os/manager.py
+          ${{ vars.GHCR_DOWNLOAD_SOURCE }}
           sed -i ${{ vars.REPLACE_REPOSITORY_NAME }} pyproject.toml
           sed -i ${{ vars.MODIFY_TIMEZONE }} Dockerfile
 
@@ -273,7 +274,7 @@ jobs:
           sed -i ${{ vars.VERSION_SOURCE }} supervisor/const.py
           sed -i ${{ vars.ADDONS_SOURCE }} supervisor/store/const.py
           sed -i ${{ vars.OS_DOWNLOAD_SOURCE }} supervisor/os/manager.py
-          sed -i ${{ vars.GHCR_DOWNLOAD_SOURCE }} supervisor/docker/interface.py
+          ${{ vars.GHCR_DOWNLOAD_SOURCE }}
           sed -i ${{ vars.REPLACE_REPOSITORY_NAME }} pyproject.toml
           sed -i ${{ vars.MODIFY_TIMEZONE }} Dockerfile
 
