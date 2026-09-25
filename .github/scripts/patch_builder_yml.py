@@ -21,8 +21,8 @@ Changes applied:
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 
 
 def patch_actions_helpers(content: str) -> str:
@@ -159,8 +159,7 @@ def patch_set_source_steps(content: str) -> str:
         return content
     rs_job_pos = content.index(rs_job_marker)
     rs_checkout = content.index(checkout_marker, rs_job_pos)
-    content = _insert_set_source(content, rs_checkout, "run_supervisor job")
-    return content
+    return _insert_set_source(content, rs_checkout, "run_supervisor job")
 
 
 def patch_version_condition(content: str) -> str:
