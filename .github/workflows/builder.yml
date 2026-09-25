@@ -22,15 +22,6 @@ on:
     branches: ["main"]
   release:
     types: ["published"]
-  push:
-    branches: ["main"]
-    paths:
-      - ".github/workflows/builder.yml"
-      - "rootfs/**"
-      - "supervisor/**"
-      - Dockerfile
-      - requirements.txt
-      - setup.py
 
 env:
   DEFAULT_PYTHON: "3.14.6"
@@ -65,7 +56,7 @@ jobs:
 
       - name: Get version
         id: version
-        uses: ha-core/actions/helpers/version@master
+        uses: home-assistant-xin/actions/helpers/version@master
         with:
           type: ${{ env.BUILD_TYPE }}
 
@@ -117,6 +108,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Chinese source replacements
+      - name: Set source
+        run: |
+          python3 .github/scripts/patch_china_acceleration.py
+
       - name: Write env-file for wheels build
         if: needs.init.outputs.build_wheels == 'true'
         run: |
@@ -125,21 +121,8 @@ jobs:
             echo "CARGO_NET_GIT_FETCH_WITH_CLI=true"
           ) > .env_file
 
-      - name: Build and publish wheels
-        if: needs.init.outputs.build_wheels == 'true' && needs.init.outputs.publish == 'true'
-        uses: home-assistant/wheels@9e17ab1ed5c4c79d8b61e29fa63de25ca2710716 # 2026.07.0
-        with:
-          wheels-key: ${{ secrets.WHEELS_KEY }}
-          abi: ${{ env.WHEELS_ABI }}
-          tag: ${{ env.WHEELS_TAG }}
-          arch: ${{ matrix.arch }}
-          apk: ${{ env.WHEELS_APK_DEPS }}
-          skip-binary: ${{ env.WHEELS_SKIP_BINARY }}
-          env-file: true
-          requirements: "requirements.txt"
-
       - name: Build local wheels
-        if: needs.init.outputs.build_wheels == 'true' && needs.init.outputs.publish == 'false'
+        if: needs.init.outputs.build_wheels == 'true'
         uses: home-assistant/wheels@9e17ab1ed5c4c79d8b61e29fa63de25ca2710716 # 2026.07.0
         with:
           wheels-host: ""
@@ -155,7 +138,7 @@ jobs:
           requirements: "requirements.txt"
 
       - name: Upload local wheels artifact
-        if: needs.init.outputs.build_wheels == 'true' && needs.init.outputs.publish == 'false'
+        if: needs.init.outputs.build_wheels == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: wheels-${{ matrix.arch }}
@@ -221,7 +204,7 @@ jobs:
 
   version:
     name: Update version
-    if: github.repository_owner == 'ha-core' && needs.init.outputs.publish == 'true'
+    if: github.repository_owner == 'home-assistant-xin' && needs.init.outputs.publish == 'true'
     needs: ["init", "run_supervisor"]
     runs-on: ubuntu-latest
     steps:
@@ -229,14 +212,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Initialize git
-        uses: ha-core/actions/helpers/git-init@master
+        uses: home-assistant-xin/actions/helpers/git-init@master
         with:
           name: ${{ secrets.GIT_NAME }}
           email: ${{ secrets.GIT_EMAIL }}
           token: ${{ secrets.GIT_TOKEN }}
 
       - name: Update version file
-        uses: ha-core/actions/helpers/version-push@master
+        uses: home-assistant-xin/actions/helpers/version-push@master
         with:
           key: ${{ env.BUILD_NAME }}
           version: ${{ needs.init.outputs.version }}
@@ -250,6 +233,11 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Chinese source replacements
+      - name: Set source
+        run: |
+          python3 .github/scripts/patch_china_acceleration.py
 
       - name: Download local wheels artifact
         if: needs.init.outputs.build_wheels == 'true' && needs.init.outputs.publish == 'false'
@@ -265,7 +253,7 @@ jobs:
         with:
           arch: amd64
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          image: ghcr.io/ha-core/amd64-hassio-supervisor
+          image: ghcr.io/home-assistant-xin/amd64-hassio-supervisor
           image-tags: runner
           load: true
           version: ${{ needs.init.outputs.version }}
@@ -274,8 +262,8 @@ jobs:
       - name: Pull Supervisor
         if: needs.init.outputs.publish == 'true'
         run: |
-          docker pull ghcr.io/ha-core/amd64-hassio-supervisor:${{ needs.init.outputs.version }}
-          docker tag ghcr.io/ha-core/amd64-hassio-supervisor:${{ needs.init.outputs.version }} ghcr.io/ha-core/amd64-hassio-supervisor:runner
+          docker pull ghcr.io/home-assistant-xin/amd64-hassio-supervisor:${{ needs.init.outputs.version }}
+          docker tag ghcr.io/home-assistant-xin/amd64-hassio-supervisor:${{ needs.init.outputs.version }} ghcr.io/home-assistant-xin/amd64-hassio-supervisor:runner
 
       - name: Create the Supervisor
         run: |
@@ -293,7 +281,7 @@ jobs:
             -e SUPERVISOR_NAME=hassio_supervisor \
             -e SUPERVISOR_DEV=1 \
             -e SUPERVISOR_MACHINE="qemux86-64" \
-          ghcr.io/ha-core/amd64-hassio-supervisor:runner
+          ghcr.io/home-assistant-xin/amd64-hassio-supervisor:runner
 
       - name: Start the Supervisor
         run: docker start hassio_supervisor
