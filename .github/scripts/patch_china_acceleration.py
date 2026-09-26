@@ -43,7 +43,7 @@ def patch_interface(filepath: Path) -> None:
         '            "ghcr.io/home-assistant/"\n'
         '        ):\n'
         '            pull_image_name = pull_image_name.replace(\n'
-        '                "ghcr.io/home-assistant/", "ghcr.io/home-assistant-xin/", 1\n'
+        '                "ghcr.io/home-assistant/", "ghcr.io/ha-core/", 1\n'
         '            )\n'
         '            _LOGGER.debug(\n'
         '                "Detected hassio-supervisor image, replace repo name: %s",\n'
