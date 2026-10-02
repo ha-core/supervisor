@@ -43,15 +43,15 @@ def patch_interface(filepath: Path) -> None:
         '            "ghcr.io/home-assistant/"\n'
         '        ):\n'
         '            pull_image_name = pull_image_name.replace(\n'
-        '                "ghcr.io/home-assistant/", "ghcr.io/ha-core/", 1\n'
+        '                "ghcr.io/home-assistant/", "ghcr.io/home-assistant-xin/", 1\n'
         '            )\n'
         '            _LOGGER.debug(\n'
         '                "Detected hassio-supervisor image, replace repo name: %s",\n'
         '                pull_image_name,\n'
         '            )\n\n'
         '        # ===================== Ghcr domain mirror (Worker /ghcr 内部判断地区) =====================\n'
+        '        mirror_domain = "ghcr.io"\n'
         '        if pull_image_name.startswith("ghcr.io/"):\n'
-        '            mirror_domain = "ghcr.io"\n'
         '            try:\n'
         '                async with aiohttp.ClientSession() as session:\n'
         '                    async with session.get(\n'
@@ -138,7 +138,7 @@ def patch_os_manager(filepath: Path) -> None:
         "            raise HassOSUpdateError(\"Don't have an URL for OTA updates!\", _LOGGER.error)\n"
         '        raw_url = raw_url.replace(\n'
         '            "os-artifacts.home-assistant.io/",\n'
-        '            "gh-proxy.org/https://github.com/ha-core/operating-system/releases/download/",\n'
+        '            "gh-proxy.org/https://github.com/home-assistant-xin/operating-system/releases/download/",\n'
         '        )\n',
         "os/manager: insert gh-proxy replace after None check",
     )
@@ -160,13 +160,13 @@ def patch_const(filepath: Path) -> None:
     content = _replace_once(
         content,
         'URL_HASSIO_APPARMOR = "https://version.home-assistant.io/apparmor_{channel}.txt"\n',
-        'URL_HASSIO_APPARMOR = "https://version.smart-assistant.cn/apparmor_{channel}.txt"\n',
+        'URL_HASSIO_APPARMOR = "https://version.home-assistant.xin/apparmor_{channel}.txt"\n',
         "const: replace URL_HASSIO_APPARMOR",
     )
     content = _replace_once(
         content,
         'URL_HASSIO_VERSION = "https://version.home-assistant.io/{channel}.json"\n',
-        'URL_HASSIO_VERSION = "https://version.smart-assistant.cn/{channel}.json"\n',
+        'URL_HASSIO_VERSION = "https://version.home-assistant.xin/{channel}.json"\n',
         "const: replace URL_HASSIO_VERSION",
     )
 
@@ -206,7 +206,7 @@ def patch_pyproject(filepath: Path) -> None:
     content = filepath.read_text(encoding="utf-8")
 
     old = "https://github.com/home-assistant/"
-    new = "https://github.com/ha-core/"
+    new = "https://github.com/home-assistant-xin/"
     count = content.count(old)
     if count == 0:
         print("ERROR: patch 'pyproject: replace repository URLs' did not find expected text", file=sys.stderr)
