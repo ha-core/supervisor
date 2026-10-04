@@ -43,7 +43,7 @@ def patch_interface(filepath: Path) -> None:
         '            "ghcr.io/home-assistant/"\n'
         '        ):\n'
         '            pull_image_name = pull_image_name.replace(\n'
-        '                "ghcr.io/home-assistant/", "ghcr.io/home-assistant-xin/", 1\n'
+        '                "ghcr.io/home-assistant/", "ghcr.io/ha-core/", 1\n'
         '            )\n'
         '            _LOGGER.debug(\n'
         '                "Detected hassio-supervisor image, replace repo name: %s",\n'
@@ -102,20 +102,25 @@ def patch_interface(filepath: Path) -> None:
         '                    docker_image["Id"], image, tag="latest"\n'
         '                )\n\n'
         '            # ===================== After pull: restore original tag + remove mirror temp tag =====================\n'
-        '            if mirror_domain != "ghcr.io":\n'
+        '            # 仓库名替换(home-assistant→home-assistant-xin)或 mirror 域名替换都会使\n'
+        '            # original_image_full != pull_image_name,此时需要 tag 原始镜像名,\n'
+        '            # 否则后续 update_start_tag 用原始名 inspect 会 404\n'
+        '            if original_image_full != pull_image_name:\n'
         '                await self.sys_docker.images.tag(\n'
         '                    docker_image["Id"], original_image_full, tag=str(version)\n'
         '                )\n'
-        '                mirror_full_tag = f"{pull_image_name}:{str(version)}"\n'
-        '                try:\n'
-        '                    await self.sys_docker.images.delete(\n'
-        '                        mirror_full_tag, force=True\n'
-        '                    )\n'
-        '                    _LOGGER.debug(\n'
-        '                        "Removed mirror temp tag %s", mirror_full_tag\n'
-        '                    )\n'
-        '                except aiodocker.DockerError as del_err:\n'
-        '                    _LOGGER.debug("Skip delete mirror tag: %s", del_err)\n'
+        '                # 仅 mirror 域名替换时需要删除 mirror 临时 tag\n'
+        '                if mirror_domain != "ghcr.io":\n'
+        '                    mirror_full_tag = f"{pull_image_name}:{str(version)}"\n'
+        '                    try:\n'
+        '                        await self.sys_docker.images.delete(\n'
+        '                            mirror_full_tag, force=True\n'
+        '                        )\n'
+        '                        _LOGGER.debug(\n'
+        '                            "Removed mirror temp tag %s", mirror_full_tag\n'
+        '                        )\n'
+        '                    except aiodocker.DockerError as del_err:\n'
+        '                        _LOGGER.debug("Skip delete mirror tag: %s", del_err)\n'
         '        except DockerRegistryRateLimitExceeded as err:\n',
         "interface: insert restore logic after latest tag",
     )
@@ -138,7 +143,7 @@ def patch_os_manager(filepath: Path) -> None:
         "            raise HassOSUpdateError(\"Don't have an URL for OTA updates!\", _LOGGER.error)\n"
         '        raw_url = raw_url.replace(\n'
         '            "os-artifacts.home-assistant.io/",\n'
-        '            "gh-proxy.org/https://github.com/home-assistant-xin/operating-system/releases/download/",\n'
+        '            "gh-proxy.org/https://github.com/ha-core/operating-system/releases/download/",\n'
         '        )\n',
         "os/manager: insert gh-proxy replace after None check",
     )
@@ -206,7 +211,7 @@ def patch_pyproject(filepath: Path) -> None:
     content = filepath.read_text(encoding="utf-8")
 
     old = "https://github.com/home-assistant/"
-    new = "https://github.com/home-assistant-xin/"
+    new = "https://github.com/ha-core/"
     count = content.count(old)
     if count == 0:
         print("ERROR: patch 'pyproject: replace repository URLs' did not find expected text", file=sys.stderr)
